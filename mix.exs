@@ -23,7 +23,7 @@ defmodule Exspotify.MixProject do
   defp deps do
     [
       {:jason, "~> 1.4"},
-      {:tesla, "~> 1.11"},
+      {:req, "~> 0.5"},
       {:finch, "~> 0.19"},
       {:oauth2, "~> 2.0"},
       {:dotenv, "~> 3.0.0", only: [:dev, :test]},
