@@ -15,6 +15,7 @@ defmodule Exspotify.Application do
     children = [
       # Starts a worker by calling: Exspotify.Worker.start_link(arg)
       # {Exspotify.Worker, arg}
+      {Finch, name: Exspotify.Finch}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
