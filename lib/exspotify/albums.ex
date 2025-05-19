@@ -88,4 +88,17 @@ defmodule Exspotify.Albums do
     path = "/browse/new-releases" <> if(query != "", do: "?#{query}", else: "")
     Client.get(path, [], token)
   end
+
+  @doc """
+  Fetches all saved albums for the user, following all pages.
+
+  **Warning:** This may make a large number of requests if the user has many saved albums.
+  You can limit the number of items fetched with the `:max_items` option (default: 200).
+  """
+  @spec get_all_users_saved_albums(String.t(), keyword) :: [map]
+  def get_all_users_saved_albums(token, opts \\ []) do
+    max_items = Keyword.get(opts, :max_items, 200)
+    fetch_page = fn page_opts -> get_users_saved_albums(token, page_opts) end
+    Exspotify.Pagination.fetch_all(fetch_page, opts, max_items)
+  end
 end
