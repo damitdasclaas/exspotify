@@ -25,10 +25,10 @@ defmodule Exspotify.Client do
     url = base_url() <> path
     auth_header = {"Authorization", "Bearer #{token}"}
 
-    # For POST/PUT, encode body as JSON and set Content-Type
+    # For POST/PUT/DELETE, encode body as JSON and set Content-Type
     {final_body, final_headers} =
       case method do
-        m when m in [:post, :put] ->
+        m when m in [:post, :put, :delete] ->
           json_body = Jason.encode!(body)
           {json_body, [{"Content-Type", "application/json"} | headers]}
         _ ->
@@ -90,10 +90,10 @@ defmodule Exspotify.Client do
   end
 
   @doc """
-  Makes a DELETE request to the given Spotify API path with optional headers and access token.
+  Makes a DELETE request to the given Spotify API path with a body, optional headers, and access token.
   """
-  @spec delete(String.t(), list, String.t()) :: any
-  def delete(path, headers \\ [], token) do
-    request(:delete, path, headers, nil, token)
+  @spec delete(String.t(), any, list, String.t()) :: any
+  def delete(path, body, headers \\ [], token) do
+    request(:delete, path, headers, body, token)
   end
 end
