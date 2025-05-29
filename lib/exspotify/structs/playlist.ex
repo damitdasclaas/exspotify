@@ -43,6 +43,11 @@ defmodule Exspotify.Structs.Playlist do
   """
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
+    # Validate required fields
+    unless map["id"] && map["name"] && map["type"] && map["uri"] do
+      raise ArgumentError, "Playlist missing required fields: id, name, type, or uri"
+    end
+
     %__MODULE__{
       id: Map.get(map, "id"),
       name: Map.get(map, "name"),
@@ -67,6 +72,7 @@ defmodule Exspotify.Structs.Playlist do
   defp parse_images(images) when is_list(images) do
     Enum.map(images, &Image.from_map/1)
   end
+  defp parse_images(_), do: nil  # Handle invalid input gracefully
 
   defp parse_owner(nil), do: nil
   defp parse_owner(map), do: User.from_map(map)

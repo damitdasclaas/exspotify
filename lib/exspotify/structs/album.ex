@@ -57,6 +57,11 @@ defmodule Exspotify.Structs.Album do
   """
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
+    # Validate required fields
+    unless map["id"] && map["name"] && map["type"] && map["uri"] do
+      raise ArgumentError, "Album missing required fields: id, name, type, or uri"
+    end
+
     %__MODULE__{
       id: Map.get(map, "id"),
       name: Map.get(map, "name"),
@@ -64,7 +69,7 @@ defmodule Exspotify.Structs.Album do
       uri: Map.get(map, "uri"),
       href: Map.get(map, "href"),
       album_type: Map.get(map, "album_type"),
-      total_tracks: Map.get(map, "total_tracks"),
+      total_tracks: validate_integer(Map.get(map, "total_tracks")),
       available_markets: Map.get(map, "available_markets"),
       external_urls: parse_external_urls(Map.get(map, "external_urls")),
       external_ids: parse_external_ids(Map.get(map, "external_ids")),
@@ -74,7 +79,7 @@ defmodule Exspotify.Structs.Album do
       artists: parse_artists(Map.get(map, "artists")),
       genres: Map.get(map, "genres"),
       label: Map.get(map, "label"),
-      popularity: Map.get(map, "popularity"),
+      popularity: validate_integer(Map.get(map, "popularity")),
       copyrights: Map.get(map, "copyrights"),
       restrictions: Map.get(map, "restrictions"),
       tracks: Map.get(map, "tracks")
@@ -91,9 +96,16 @@ defmodule Exspotify.Structs.Album do
   defp parse_images(images) when is_list(images) do
     Enum.map(images, &Image.from_map/1)
   end
+  defp parse_images(_), do: nil  # Handle invalid input gracefully
 
   defp parse_artists(nil), do: nil
   defp parse_artists(artists) when is_list(artists) do
     Enum.map(artists, &Artist.from_map/1)
   end
+  defp parse_artists(_), do: nil  # Handle invalid input gracefully
+
+  # Validates that a value is an integer or nil
+  defp validate_integer(nil), do: nil
+  defp validate_integer(value) when is_integer(value), do: value
+  defp validate_integer(_), do: nil  # Convert invalid types to nil
 end

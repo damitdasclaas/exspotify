@@ -41,6 +41,11 @@ defmodule Exspotify.Structs.User do
   """
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
+    # Validate required fields
+    unless map["id"] && map["type"] && map["uri"] do
+      raise ArgumentError, "User missing required fields: id, type, or uri"
+    end
+
     %__MODULE__{
       id: Map.get(map, "id"),
       type: Map.get(map, "type"),
@@ -67,4 +72,5 @@ defmodule Exspotify.Structs.User do
   defp parse_images(images) when is_list(images) do
     Enum.map(images, &Image.from_map/1)
   end
+  defp parse_images(_), do: nil  # Handle invalid input gracefully
 end
