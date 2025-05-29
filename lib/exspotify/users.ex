@@ -5,23 +5,30 @@ defmodule Exspotify.Users do
   """
 
   alias Exspotify.Client
+  alias Exspotify.Structs.{User, Artist, Track, Paging}
 
   @doc """
   Get the current user's profile.
   https://developer.spotify.com/documentation/web-api/reference/get-current-users-profile
   """
-  @spec get_current_user_profile(String.t()) :: any
+  @spec get_current_user_profile(String.t()) :: {:ok, User.t()} | {:error, any()}
   def get_current_user_profile(token) do
-    Client.get("/me", [], token)
+    case Client.get("/me", [], token) do
+      {:ok, user_map} -> {:ok, User.from_map(user_map)}
+      error -> error
+    end
   end
 
   @doc """
   Get a user's public profile by their Spotify user ID.
   https://developer.spotify.com/documentation/web-api/reference/get-users-profile
   """
-  @spec get_user_profile(String.t(), String.t()) :: any
+  @spec get_user_profile(String.t(), String.t()) :: {:ok, User.t()} | {:error, any()}
   def get_user_profile(user_id, token) do
-    Client.get("/users/#{user_id}", [], token)
+    case Client.get("/users/#{user_id}", [], token) do
+      {:ok, user_map} -> {:ok, User.from_map(user_map)}
+      error -> error
+    end
   end
 
   @doc """
@@ -29,11 +36,21 @@ defmodule Exspotify.Users do
   https://developer.spotify.com/documentation/web-api/reference/get-users-top-artists-and-tracks
   type: "artists" or "tracks"
   """
-  @spec get_user_top_items(String.t(), String.t(), keyword) :: any
+  @spec get_user_top_items(String.t(), String.t(), keyword) :: {:ok, Paging.t()} | {:error, any()}
   def get_user_top_items(type, token, opts \\ []) do
     query = URI.encode_query(opts)
     path = "/me/top/#{type}" <> if(query != "", do: "?#{query}", else: "")
-    Client.get(path, [], token)
+    case Client.get(path, [], token) do
+      {:ok, paging_map} ->
+        item_parser = case type do
+          "artists" -> &Artist.from_map/1
+          "tracks" -> &Track.from_map/1
+          _ -> & &1  # fallback for unknown types
+        end
+        parsed_paging = Paging.from_map(paging_map, item_parser)
+        {:ok, parsed_paging}
+      error -> error
+    end
   end
 
   @doc """
@@ -42,7 +59,7 @@ defmodule Exspotify.Users do
   type: "artist" or "user"
   https://developer.spotify.com/documentation/web-api/reference/follow-artists-users
   """
-  @spec follow_artists_or_users(String.t(), String.t(), [String.t()], String.t()) :: any
+  @spec follow_artists_or_users(String.t(), String.t(), [String.t()], String.t()) :: {:ok, any()} | {:error, any()}
   def follow_artists_or_users(type, token, ids, _context_user_id \\ nil) when is_list(ids) do
     query = URI.encode_query(%{"type" => type, "ids" => Enum.join(ids, ",")})
     Client.put("/me/following?#{query}", %{}, [], token)
@@ -54,7 +71,7 @@ defmodule Exspotify.Users do
   type: "artist" or "user"
   https://developer.spotify.com/documentation/web-api/reference/unfollow-artists-users
   """
-  @spec unfollow_artists_or_users(String.t(), String.t(), [String.t()], String.t()) :: any
+  @spec unfollow_artists_or_users(String.t(), String.t(), [String.t()], String.t()) :: {:ok, any()} | {:error, any()}
   def unfollow_artists_or_users(type, token, ids, _context_user_id \\ nil) when is_list(ids) do
     query = URI.encode_query(%{"type" => type, "ids" => Enum.join(ids, ",")})
     Client.delete("/me/following?#{query}", [], token)
@@ -65,7 +82,7 @@ defmodule Exspotify.Users do
   type: "artist" or "user"
   https://developer.spotify.com/documentation/web-api/reference/check-current-user-follows
   """
-  @spec check_if_user_follows_artists_or_users(String.t(), String.t(), [String.t()], String.t()) :: any
+  @spec check_if_user_follows_artists_or_users(String.t(), String.t(), [String.t()], String.t()) :: {:ok, [boolean()]} | {:error, any()}
   def check_if_user_follows_artists_or_users(type, token, ids, _context_user_id \\ nil) when is_list(ids) do
     query = URI.encode_query(%{"type" => type, "ids" => Enum.join(ids, ",")})
     Client.get("/me/following/contains?#{query}", [], token)
@@ -75,13 +92,15 @@ defmodule Exspotify.Users do
   Get the current user's followed artists (paginated).
   https://developer.spotify.com/documentation/web-api/reference/get-followed-artists
   """
-  @spec get_followed_artists(String.t(), keyword) :: any
+  @spec get_followed_artists(String.t(), keyword) :: {:ok, Paging.t()} | {:error, any()}
   def get_followed_artists(token, opts \\ []) do
     query = URI.encode_query(opts)
     path = "/me/following?type=artist" <> if(query != "", do: "&#{query}", else: "")
     case Client.get(path, [], token) do
-      {:ok, %{"artists" => artists}} -> {:ok, artists}
-      other -> other
+      {:ok, %{"artists" => paging_map}} ->
+        parsed_paging = Paging.from_map(paging_map, &Artist.from_map/1)
+        {:ok, parsed_paging}
+      error -> error
     end
   end
 end
