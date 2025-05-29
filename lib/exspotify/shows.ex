@@ -7,7 +7,6 @@ defmodule Exspotify.Shows do
   """
 
   alias Exspotify.Client
-  alias Exspotify.Pagination
 
   @doc """
   Get Spotify catalog information for a single show by its unique Spotify ID.
@@ -40,19 +39,6 @@ defmodule Exspotify.Shows do
   end
 
   @doc """
-  Fetches all episodes for a show, following all pages.
-
-  **Warning:** This may make a large number of requests if the show has many episodes.
-  You can limit the number of items fetched with the `:max_items` option (default: 200).
-  """
-  @spec get_all_show_episodes(String.t(), String.t(), keyword) :: [map]
-  def get_all_show_episodes(show_id, token, opts \\ []) do
-    max_items = Keyword.get(opts, :max_items, 200)
-    fetch_page = fn page_opts -> get_show_episodes(show_id, token, page_opts) end
-    Pagination.fetch_all(fetch_page, opts, max_items)
-  end
-
-  @doc """
   Get a list of the shows saved in the current Spotify user's library (paginated).
   https://developer.spotify.com/documentation/web-api/reference/get-users-saved-shows
   """
@@ -61,19 +47,6 @@ defmodule Exspotify.Shows do
     query = URI.encode_query(opts)
     path = "/me/shows" <> if(query != "", do: "?#{query}", else: "")
     Client.get(path, [], token)
-  end
-
-  @doc """
-  Fetches all saved shows for the user, following all pages.
-
-  **Warning:** This may make a large number of requests if the user has many saved shows.
-  You can limit the number of items fetched with the `:max_items` option (default: 200).
-  """
-  @spec get_all_users_saved_shows(String.t(), keyword) :: [map]
-  def get_all_users_saved_shows(token, opts \\ []) do
-    max_items = Keyword.get(opts, :max_items, 200)
-    fetch_page = fn page_opts -> get_users_saved_shows(token, page_opts) end
-    Pagination.fetch_all(fetch_page, opts, max_items)
   end
 
   @doc """

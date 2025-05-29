@@ -5,7 +5,6 @@ defmodule Exspotify.Users do
   """
 
   alias Exspotify.Client
-  alias Exspotify.Pagination
 
   @doc """
   Get the current user's profile.
@@ -35,19 +34,6 @@ defmodule Exspotify.Users do
     query = URI.encode_query(opts)
     path = "/me/top/#{type}" <> if(query != "", do: "?#{query}", else: "")
     Client.get(path, [], token)
-  end
-
-  @doc """
-  Fetches all top items (artists or tracks) for the user, following all pages.
-
-  **Warning:** This may make a large number of requests if the user has many top items.
-  You can limit the number of items fetched with the `:max_items` option (default: 200).
-  """
-  @spec get_all_user_top_items(String.t(), String.t(), keyword) :: [map]
-  def get_all_user_top_items(type, token, opts \\ []) do
-    max_items = Keyword.get(opts, :max_items, 200)
-    fetch_page = fn page_opts -> get_user_top_items(type, token, page_opts) end
-    Pagination.fetch_all(fetch_page, opts, max_items)
   end
 
   @doc """
@@ -97,17 +83,5 @@ defmodule Exspotify.Users do
       {:ok, %{"artists" => artists}} -> {:ok, artists}
       other -> other
     end
-  end
-
-  @doc """
-  Fetches all followed artists for the user, following all pages.
-  **Warning:** This may make a large number of requests if the user follows many artists.
-  You can limit the number of items fetched with the `:max_items` option (default: 200).
-  """
-  @spec get_all_followed_artists(String.t(), keyword) :: [map]
-  def get_all_followed_artists(token, opts \\ []) do
-    max_items = Keyword.get(opts, :max_items, 200)
-    fetch_page = fn page_opts -> get_followed_artists(token, page_opts) end
-    Pagination.fetch_all(fetch_page, opts, max_items)
   end
 end

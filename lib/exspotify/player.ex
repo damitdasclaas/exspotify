@@ -6,7 +6,6 @@ defmodule Exspotify.Player do
   """
 
   alias Exspotify.Client
-  alias Exspotify.Pagination
 
   @doc """
   Get information about the user's current playback state.
@@ -135,20 +134,6 @@ defmodule Exspotify.Player do
     query = URI.encode_query(opts)
     path = "/me/player/recently-played" <> if(query != "", do: "?#{query}", else: "")
     Client.get(path, [], token)
-  end
-
-  @doc """
-  Fetches all recently played tracks for the user, following all pages.
-
-  **Warning:** This may make a large number of requests if the user has a long listening history.
-  You can limit the number of items fetched with the `:max_items` option (default: 200).
-  Requires: user-read-recently-played scope.
-  """
-  @spec get_all_recently_played(String.t(), keyword) :: [map]
-  def get_all_recently_played(token, opts \\ []) do
-    max_items = Keyword.get(opts, :max_items, 200)
-    fetch_page = fn page_opts -> get_recently_played(token, page_opts) end
-    Pagination.fetch_all(fetch_page, opts, max_items)
   end
 
   @doc """

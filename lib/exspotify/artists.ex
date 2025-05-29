@@ -7,7 +7,6 @@ defmodule Exspotify.Artists do
   """
 
   alias Exspotify.Client
-  alias Exspotify.Pagination
 
   @doc """
   Get Spotify catalog information for a single artist by their unique Spotify ID.
@@ -37,19 +36,6 @@ defmodule Exspotify.Artists do
     query = URI.encode_query(opts)
     path = "/artists/#{artist_id}/albums" <> if(query != "", do: "?#{query}", else: "")
     Client.get(path, [], token)
-  end
-
-  @doc """
-  Fetches all albums for an artist, following all pages.
-
-  **Warning:** This may make a large number of requests if the artist has many albums.
-  You can limit the number of items fetched with the `:max_items` option (default: 200).
-  """
-  @spec get_all_artist_albums(String.t(), String.t(), keyword) :: [map]
-  def get_all_artist_albums(artist_id, token, opts \\ []) do
-    max_items = Keyword.get(opts, :max_items, 200)
-    fetch_page = fn page_opts -> get_artist_albums(artist_id, token, page_opts) end
-    Pagination.fetch_all(fetch_page, opts, max_items)
   end
 
   @doc """

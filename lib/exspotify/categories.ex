@@ -5,7 +5,6 @@ defmodule Exspotify.Categories do
   """
 
   alias Exspotify.Client
-  alias Exspotify.Pagination
 
   @doc """
   Get a list of categories used to tag items in Spotify (paginated).
@@ -19,19 +18,6 @@ defmodule Exspotify.Categories do
       {:ok, %{"categories" => categories}} -> {:ok, categories}
       other -> other
     end
-  end
-
-  @doc """
-  Fetches all categories, following all pages.
-
-  **Warning:** This may make a large number of requests if there are many categories.
-  You can limit the number of items fetched with the `:max_items` option (default: 200).
-  """
-  @spec get_all_categories(String.t(), keyword) :: [map]
-  def get_all_categories(token, opts \\ []) do
-    max_items = Keyword.get(opts, :max_items, 200)
-    fetch_page = fn page_opts -> get_categories(token, page_opts) end
-    Pagination.fetch_all(fetch_page, opts, max_items)
   end
 
   @doc """

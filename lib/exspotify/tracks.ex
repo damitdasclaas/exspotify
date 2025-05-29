@@ -6,7 +6,6 @@ defmodule Exspotify.Tracks do
   """
 
   alias Exspotify.Client
-  alias Exspotify.Pagination
 
   @doc """
   Get Spotify catalog information for a single track by its unique Spotify ID.
@@ -36,19 +35,6 @@ defmodule Exspotify.Tracks do
     query = URI.encode_query(opts)
     path = "/me/tracks" <> if(query != "", do: "?#{query}", else: "")
     Client.get(path, [], token)
-  end
-
-  @doc """
-  Fetches all saved tracks for the user, following all pages.
-
-  **Warning:** This may make a large number of requests if the user has many saved tracks.
-  You can limit the number of items fetched with the `:max_items` option (default: 200).
-  """
-  @spec get_all_users_saved_tracks(String.t(), keyword) :: [map]
-  def get_all_users_saved_tracks(token, opts \\ []) do
-    max_items = Keyword.get(opts, :max_items, 200)
-    fetch_page = fn page_opts -> get_users_saved_tracks(token, page_opts) end
-    Pagination.fetch_all(fetch_page, opts, max_items)
   end
 
   @doc """

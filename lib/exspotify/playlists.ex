@@ -6,7 +6,6 @@ defmodule Exspotify.Playlists do
   """
 
   alias Exspotify.Client
-  alias Exspotify.Pagination
 
   @doc """
   Get a playlist by its Spotify ID.
@@ -39,16 +38,25 @@ defmodule Exspotify.Playlists do
   end
 
   @doc """
-  Fetches all items in a playlist, following all pages.
-
-  **Warning:** This may make a large number of requests if the playlist is large.
-  You can limit the number of items fetched with the `:max_items` option (default: 200).
+  Get the current user's playlists (paginated).
+  https://developer.spotify.com/documentation/web-api/reference/get-current-users-playlists
   """
-  @spec get_all_playlist_items(String.t(), String.t(), keyword) :: [map]
-  def get_all_playlist_items(playlist_id, token, opts \\ []) do
-    max_items = Keyword.get(opts, :max_items, 200)
-    fetch_page = fn page_opts -> get_playlist_items(playlist_id, token, page_opts) end
-    Pagination.fetch_all(fetch_page, opts, max_items)
+  @spec get_current_users_playlists(String.t(), keyword) :: any
+  def get_current_users_playlists(token, opts \\ []) do
+    query = URI.encode_query(opts)
+    path = "/me/playlists" <> if(query != "", do: "?#{query}", else: "")
+    Client.get(path, [], token)
+  end
+
+  @doc """
+  Get a user's public playlists (paginated).
+  https://developer.spotify.com/documentation/web-api/reference/get-list-users-playlists
+  """
+  @spec get_users_playlists(String.t(), String.t(), keyword) :: any
+  def get_users_playlists(user_id, token, opts \\ []) do
+    query = URI.encode_query(opts)
+    path = "/users/#{user_id}/playlists" <> if(query != "", do: "?#{query}", else: "")
+    Client.get(path, [], token)
   end
 
   @doc """
@@ -81,52 +89,6 @@ defmodule Exspotify.Playlists do
   @spec remove_playlist_items(String.t(), String.t(), map) :: any
   def remove_playlist_items(playlist_id, token, body) do
     Client.delete("/playlists/#{playlist_id}/tracks", body, [], token)
-  end
-
-  @doc """
-  Get the current user's playlists (paginated).
-  https://developer.spotify.com/documentation/web-api/reference/get-current-users-playlists
-  """
-  @spec get_current_users_playlists(String.t(), keyword) :: any
-  def get_current_users_playlists(token, opts \\ []) do
-    query = URI.encode_query(opts)
-    path = "/me/playlists" <> if(query != "", do: "?#{query}", else: "")
-    Client.get(path, [], token)
-  end
-
-  @doc """
-  Fetches all playlists for the current user, following all pages.
-  **Warning:** This may make a large number of requests if the user has many playlists.
-  You can limit the number of items fetched with the `:max_items` option (default: 200).
-  """
-  @spec get_all_current_users_playlists(String.t(), keyword) :: [map]
-  def get_all_current_users_playlists(token, opts \\ []) do
-    max_items = Keyword.get(opts, :max_items, 200)
-    fetch_page = fn page_opts -> get_current_users_playlists(token, page_opts) end
-    Pagination.fetch_all(fetch_page, opts, max_items)
-  end
-
-  @doc """
-  Get a user's public playlists (paginated).
-  https://developer.spotify.com/documentation/web-api/reference/get-list-users-playlists
-  """
-  @spec get_users_playlists(String.t(), String.t(), keyword) :: any
-  def get_users_playlists(user_id, token, opts \\ []) do
-    query = URI.encode_query(opts)
-    path = "/users/#{user_id}/playlists" <> if(query != "", do: "?#{query}", else: "")
-    Client.get(path, [], token)
-  end
-
-  @doc """
-  Fetches all playlists for a user, following all pages.
-  **Warning:** This may make a large number of requests if the user has many playlists.
-  You can limit the number of items fetched with the `:max_items` option (default: 200).
-  """
-  @spec get_all_users_playlists(String.t(), String.t(), keyword) :: [map]
-  def get_all_users_playlists(user_id, token, opts \\ []) do
-    max_items = Keyword.get(opts, :max_items, 200)
-    fetch_page = fn page_opts -> get_users_playlists(user_id, token, page_opts) end
-    Pagination.fetch_all(fetch_page, opts, max_items)
   end
 
   @doc """

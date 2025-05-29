@@ -314,7 +314,6 @@ Write comprehensive tests for your wrapper:
 ## 5. Important Considerations for Spotify API
 
 *   **Token Management:** Robust access token fetching, storage, and refreshing is critical. Consider a GenServer to manage the token lifecycle.
-*   **Pagination:** Many Spotify API endpoints return paginated results. Your wrapper should handle pagination, either by automatically fetching all pages or by providing functions to fetch specific pages. Look for `next` and `previous` URLs in responses.
 *   **Market Parameter:** Many endpoints accept a `market` parameter. Consider how your wrapper will handle this (e.g., default, allow user to specify).
 *   **Track Relinking:** Be aware of [Track Relinking](https://developer.spotify.com/documentation/web-api/concepts/track-relinking) if you need to handle tracks that might not be available in a user's market.
 *   **User Authorization:** For operations that require user context (e.g., managing playlists, accessing user profile), implement the Authorization Code flow or Authorization Code with PKCE. This is more complex than Client Credentials.

@@ -5,7 +5,6 @@ defmodule Exspotify.Audiobooks do
   """
 
   alias Exspotify.Client
-  alias Exspotify.Pagination
 
   @doc """
   Get Spotify catalog information for a single audiobook by its unique Spotify ID.
@@ -38,19 +37,6 @@ defmodule Exspotify.Audiobooks do
   end
 
   @doc """
-  Fetches all chapters for an audiobook, following all pages.
-
-  **Warning:** This may make a large number of requests if the audiobook has many chapters.
-  You can limit the number of items fetched with the `:max_items` option (default: 200).
-  """
-  @spec get_all_audiobook_chapters(String.t(), String.t(), keyword) :: [map]
-  def get_all_audiobook_chapters(audiobook_id, token, opts \\ []) do
-    max_items = Keyword.get(opts, :max_items, 200)
-    fetch_page = fn page_opts -> get_audiobook_chapters(audiobook_id, token, page_opts) end
-    Pagination.fetch_all(fetch_page, opts, max_items)
-  end
-
-  @doc """
   Get a list of the audiobooks saved in the current Spotify user's library (paginated).
   https://developer.spotify.com/documentation/web-api/reference/get-users-saved-audiobooks
   """
@@ -59,19 +45,6 @@ defmodule Exspotify.Audiobooks do
     query = URI.encode_query(opts)
     path = "/me/audiobooks" <> if(query != "", do: "?#{query}", else: "")
     Client.get(path, [], token)
-  end
-
-  @doc """
-  Fetches all saved audiobooks for the user, following all pages.
-
-  **Warning:** This may make a large number of requests if the user has many saved audiobooks.
-  You can limit the number of items fetched with the `:max_items` option (default: 200).
-  """
-  @spec get_all_users_saved_audiobooks(String.t(), keyword) :: [map]
-  def get_all_users_saved_audiobooks(token, opts \\ []) do
-    max_items = Keyword.get(opts, :max_items, 200)
-    fetch_page = fn page_opts -> get_users_saved_audiobooks(token, page_opts) end
-    Pagination.fetch_all(fetch_page, opts, max_items)
   end
 
   @doc """
