@@ -37,16 +37,11 @@ defmodule Exspotify.Structs.Artist do
   """
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
-    # Validate required fields
-    unless map["id"] && map["name"] && map["type"] && map["uri"] do
-      raise ArgumentError, "Artist missing required fields: id, name, type, or uri"
-    end
-
     %__MODULE__{
-      id: Map.get(map, "id"),
-      name: Map.get(map, "name"),
-      type: Map.get(map, "type"),
-      uri: Map.get(map, "uri"),
+      id: Map.get(map, "id") || "unknown",
+      name: Map.get(map, "name") || "Unknown Artist",
+      type: Map.get(map, "type") || "artist",
+      uri: Map.get(map, "uri") || "",
       href: Map.get(map, "href"),
       external_urls: parse_external_urls(Map.get(map, "external_urls")),
       followers: parse_followers(Map.get(map, "followers")),

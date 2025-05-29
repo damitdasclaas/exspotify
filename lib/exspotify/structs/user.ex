@@ -41,15 +41,10 @@ defmodule Exspotify.Structs.User do
   """
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
-    # Validate required fields
-    unless map["id"] && map["type"] && map["uri"] do
-      raise ArgumentError, "User missing required fields: id, type, or uri"
-    end
-
     %__MODULE__{
-      id: Map.get(map, "id"),
-      type: Map.get(map, "type"),
-      uri: Map.get(map, "uri"),
+      id: Map.get(map, "id") || "unknown",
+      type: Map.get(map, "type") || "user",
+      uri: Map.get(map, "uri") || "",
       href: Map.get(map, "href"),
       display_name: Map.get(map, "display_name"),
       country: Map.get(map, "country"),

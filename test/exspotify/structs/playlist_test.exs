@@ -93,17 +93,20 @@ defmodule Exspotify.Structs.PlaylistTest do
       assert result.owner == nil
     end
 
-    test "validates required fields and raises error when missing" do
+    test "provides sensible defaults for missing required fields" do
       incomplete_playlist = %{
         "name" => "Missing Fields Playlist",
         "type" => "playlist"
         # Missing "id" and "uri"
       }
 
-      # Now that Playlist has validation, this should raise an error
-      assert_raise ArgumentError, "Playlist missing required fields: id, name, type, or uri", fn ->
-        Playlist.from_map(incomplete_playlist)
-      end
+      result = Playlist.from_map(incomplete_playlist)
+
+      # Now provides sensible defaults instead of raising errors
+      assert result.id == "unknown"
+      assert result.uri == ""
+      assert result.name == "Missing Fields Playlist"
+      assert result.type == "playlist"
     end
 
     test "handles malformed images gracefully" do

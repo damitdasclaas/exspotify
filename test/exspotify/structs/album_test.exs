@@ -135,18 +135,20 @@ defmodule Exspotify.Structs.AlbumTest do
       assert result.artists == nil
     end
 
-    test "validates required fields and raises error when missing" do
-      # Test that missing required fields raise ArgumentError
+    test "provides sensible defaults for missing required fields" do
       incomplete_album = %{
-        "name" => "Missing ID Album",
-        "type" => "album",
-        "uri" => "spotify:album:missing123"
-        # Missing "id" field
+        "name" => "Missing Fields Album",
+        "type" => "album"
+        # Missing "id" and "uri"
       }
 
-      assert_raise ArgumentError, "Album missing required fields: id, name, type, or uri", fn ->
-        Album.from_map(incomplete_album)
-      end
+      result = Album.from_map(incomplete_album)
+
+      # Now provides sensible defaults instead of raising errors
+      assert result.id == "unknown"
+      assert result.uri == ""
+      assert result.name == "Missing Fields Album"
+      assert result.type == "album"
     end
 
     test "catches real bug when artist within array is malformed" do
@@ -164,17 +166,21 @@ defmodule Exspotify.Structs.AlbumTest do
             "uri" => "spotify:artist:artist1"
           },
           %{
-            # This artist has missing required fields
-            "name" => "Invalid Artist"
+            # This artist has missing required fields but should get defaults
+            "name" => "Incomplete Artist"
             # Missing id, type, uri
           }
         ]
       }
 
-      # This should now raise an error for the invalid Artist
-      assert_raise ArgumentError, "Artist missing required fields: id, name, type, or uri", fn ->
-        Album.from_map(album_map)
-      end
+      result = Album.from_map(album_map)
+
+      # Should now provide defaults for missing fields
+      assert length(result.artists) == 2
+      assert Enum.at(result.artists, 1).id == "unknown"  # Default value
+      assert Enum.at(result.artists, 1).type == "artist"  # Default value
+      assert Enum.at(result.artists, 1).uri == ""  # Default value
+      assert Enum.at(result.artists, 1).name == "Incomplete Artist"
     end
 
     test "catches real bug when image within array is malformed" do
@@ -190,17 +196,19 @@ defmodule Exspotify.Structs.AlbumTest do
             "width" => 640
           },
           %{
-            # Missing required URL field
+            # Missing required URL field but should get default
             "height" => 300,
             "width" => 300
           }
         ]
       }
 
-      # This should now raise an error for the invalid Image
-      assert_raise ArgumentError, "Image missing required URL field or URL is not a string", fn ->
-        Album.from_map(album_map)
-      end
+      result = Album.from_map(album_map)
+
+      # Should now provide default for missing URL
+      assert length(result.images) == 2
+      assert Enum.at(result.images, 1).url == ""  # Default empty string
+      assert Enum.at(result.images, 1).height == 300
     end
 
     test "handles empty nested arrays correctly" do

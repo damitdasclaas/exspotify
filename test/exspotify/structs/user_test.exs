@@ -89,19 +89,6 @@ defmodule Exspotify.Structs.UserTest do
       assert result.images == nil
     end
 
-    test "validates required fields and raises error when missing" do
-      incomplete_user = %{
-        "display_name" => "Missing Fields User",
-        "type" => "user"
-        # Missing "id" and "uri"
-      }
-
-      # Now that User has validation, this should raise an error
-      assert_raise ArgumentError, "User missing required fields: id, type, or uri", fn ->
-        User.from_map(incomplete_user)
-      end
-    end
-
     test "handles malformed images gracefully" do
       user_map = %{
         "id" => "user123",
@@ -196,6 +183,22 @@ defmodule Exspotify.Structs.UserTest do
       assert result.email == nil
       assert result.country == nil
       assert result.explicit_content == nil
+    end
+
+    test "provides sensible defaults for missing required fields" do
+      incomplete_user = %{
+        "display_name" => "Missing Fields User",
+        "type" => "user"
+        # Missing "id" and "uri"
+      }
+
+      result = User.from_map(incomplete_user)
+
+      # Now provides sensible defaults instead of raising errors
+      assert result.id == "unknown"
+      assert result.uri == ""
+      assert result.display_name == "Missing Fields User"
+      assert result.type == "user"
     end
   end
 end

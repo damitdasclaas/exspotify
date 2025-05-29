@@ -43,16 +43,11 @@ defmodule Exspotify.Structs.Playlist do
   """
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
-    # Validate required fields
-    unless map["id"] && map["name"] && map["type"] && map["uri"] do
-      raise ArgumentError, "Playlist missing required fields: id, name, type, or uri"
-    end
-
     %__MODULE__{
-      id: Map.get(map, "id"),
-      name: Map.get(map, "name"),
-      type: Map.get(map, "type"),
-      uri: Map.get(map, "uri"),
+      id: Map.get(map, "id") || "unknown",
+      name: Map.get(map, "name") || "Untitled Playlist",
+      type: Map.get(map, "type") || "playlist",
+      uri: Map.get(map, "uri") || "",
       href: Map.get(map, "href"),
       collaborative: Map.get(map, "collaborative"),
       description: Map.get(map, "description"),

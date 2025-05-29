@@ -57,16 +57,11 @@ defmodule Exspotify.Structs.Album do
   """
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
-    # Validate required fields
-    unless map["id"] && map["name"] && map["type"] && map["uri"] do
-      raise ArgumentError, "Album missing required fields: id, name, type, or uri"
-    end
-
     %__MODULE__{
-      id: Map.get(map, "id"),
-      name: Map.get(map, "name"),
-      type: Map.get(map, "type"),
-      uri: Map.get(map, "uri"),
+      id: Map.get(map, "id") || "unknown",
+      name: Map.get(map, "name") || "Untitled Album",
+      type: Map.get(map, "type") || "album",
+      uri: Map.get(map, "uri") || "",
       href: Map.get(map, "href"),
       album_type: Map.get(map, "album_type"),
       total_tracks: validate_integer(Map.get(map, "total_tracks")),

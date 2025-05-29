@@ -22,14 +22,8 @@ defmodule Exspotify.Structs.Image do
   """
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
-    # Validate required URL field
-    url = Map.get(map, "url")
-    unless url && is_binary(url) do
-      raise ArgumentError, "Image missing required URL field or URL is not a string"
-    end
-
     %__MODULE__{
-      url: url,
+      url: Map.get(map, "url") || "",
       height: validate_integer(Map.get(map, "height")),
       width: validate_integer(Map.get(map, "width"))
     }

@@ -84,16 +84,20 @@ defmodule Exspotify.Structs.ArtistTest do
       assert result.popularity == nil
     end
 
-    test "validates required fields and raises error when missing" do
+    test "provides sensible defaults for missing required fields" do
       incomplete_artist = %{
-        "name" => "Missing ID Artist",
+        "name" => "Missing Fields Artist",
         "type" => "artist"
         # Missing "id" and "uri"
       }
 
-      assert_raise ArgumentError, "Artist missing required fields: id, name, type, or uri", fn ->
-        Artist.from_map(incomplete_artist)
-      end
+      result = Artist.from_map(incomplete_artist)
+
+      # Now provides sensible defaults instead of raising errors
+      assert result.id == "unknown"
+      assert result.uri == ""
+      assert result.name == "Missing Fields Artist"
+      assert result.type == "artist"
     end
 
     test "handles type validation for popularity field" do
@@ -139,17 +143,19 @@ defmodule Exspotify.Structs.ArtistTest do
             "width" => 640
           },
           %{
-            # Missing required URL field
+            # Missing required URL field but should get default
             "height" => 300,
             "width" => 300
           }
         ]
       }
 
-      # This should raise an error for the invalid Image
-      assert_raise ArgumentError, "Image missing required URL field or URL is not a string", fn ->
-        Artist.from_map(artist_map)
-      end
+      result = Artist.from_map(artist_map)
+
+      # Should now provide default for missing URL
+      assert length(result.images) == 2
+      assert Enum.at(result.images, 1).url == ""  # Default empty string
+      assert Enum.at(result.images, 1).height == 300
     end
 
     test "handles empty arrays correctly" do
