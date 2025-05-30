@@ -33,9 +33,9 @@ defmodule Exspotify.Structs.Device do
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
     %__MODULE__{
-      id: Map.get(map, "id"),
-      name: Map.get(map, "name"),
-      type: Map.get(map, "type"),
+      id: Map.get(map, "id") || "unknown",
+      name: Map.get(map, "name") || "Unknown Device",
+      type: Map.get(map, "type") || "unknown",
       is_active: Map.get(map, "is_active"),
       is_private_session: Map.get(map, "is_private_session"),
       is_restricted: Map.get(map, "is_restricted"),

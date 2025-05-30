@@ -54,10 +54,10 @@ defmodule Exspotify.Structs.Show do
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
     %__MODULE__{
-      id: Map.get(map, "id"),
-      name: Map.get(map, "name"),
-      type: Map.get(map, "type"),
-      uri: Map.get(map, "uri"),
+      id: Map.get(map, "id") || "unknown",
+      name: Map.get(map, "name") || "Untitled Show",
+      type: Map.get(map, "type") || "show",
+      uri: Map.get(map, "uri") || "",
       href: Map.get(map, "href"),
       available_markets: Map.get(map, "available_markets"),
       copyrights: Map.get(map, "copyrights"),
@@ -75,6 +75,9 @@ defmodule Exspotify.Structs.Show do
     }
   end
 
+  # Handle non-map inputs gracefully by returning nil
+  def from_map(_), do: nil
+
   defp parse_external_urls(nil), do: nil
   defp parse_external_urls(map), do: ExternalUrls.from_map(map)
 
@@ -82,4 +85,5 @@ defmodule Exspotify.Structs.Show do
   defp parse_images(images) when is_list(images) do
     Enum.map(images, &Image.from_map/1)
   end
+  defp parse_images(_), do: nil  # Handle invalid input gracefully
 end

@@ -60,10 +60,10 @@ defmodule Exspotify.Structs.Episode do
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
     %__MODULE__{
-      id: Map.get(map, "id"),
-      name: Map.get(map, "name"),
-      type: Map.get(map, "type"),
-      uri: Map.get(map, "uri"),
+      id: Map.get(map, "id") || "unknown",
+      name: Map.get(map, "name") || "Untitled Episode",
+      type: Map.get(map, "type") || "episode",
+      uri: Map.get(map, "uri") || "",
       href: Map.get(map, "href"),
       audio_preview_url: Map.get(map, "audio_preview_url"),
       description: Map.get(map, "description"),
@@ -91,10 +91,14 @@ defmodule Exspotify.Structs.Episode do
   defp parse_images(images) when is_list(images) do
     Enum.map(images, &Image.from_map/1)
   end
+  defp parse_images(_), do: nil  # Handle invalid input gracefully
 
   defp parse_resume_point(nil), do: nil
   defp parse_resume_point(map), do: ResumePoint.from_map(map)
 
   defp parse_show(nil), do: nil
-  defp parse_show(map), do: Show.from_map(map)
+  defp parse_show(map) do
+    # Show.from_map can now return nil for invalid inputs
+    Show.from_map(map)
+  end
 end
