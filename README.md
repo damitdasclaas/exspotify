@@ -230,6 +230,7 @@ This project is licensed under the MIT License.
 
 ## Acknowledgments
 
+- Built with assistance from AI tools
 - [Spotify Web API](https://developer.spotify.com/documentation/web-api/) for providing a comprehensive music platform API
 - The Elixir community for excellent HTTP and JSON libraries
 
