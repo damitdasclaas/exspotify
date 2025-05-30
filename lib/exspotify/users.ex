@@ -63,8 +63,9 @@ defmodule Exspotify.Users do
   type: "artist" or "user"
   https://developer.spotify.com/documentation/web-api/reference/follow-artists-users
   """
-  @spec follow_artists_or_users(String.t(), String.t(), [String.t()], String.t()) :: {:ok, any()} | {:error, Error.t()}
-  def follow_artists_or_users(type, token, ids, _context_user_id \\ nil) when is_list(ids) do
+  @spec follow_artists_or_users(String.t(), String.t(), [String.t()], String.t() | nil) :: {:ok, any()} | {:error, Error.t()}
+  def follow_artists_or_users(type, token, ids, context_user_id \\ nil)
+  def follow_artists_or_users(type, token, ids, _context_user_id) when is_list(ids) do
     with :ok <- validate_follow_type(type),
          :ok <- Error.validate_token(token),
          :ok <- Error.validate_list(ids, "ids"),
@@ -84,8 +85,9 @@ defmodule Exspotify.Users do
   type: "artist" or "user"
   https://developer.spotify.com/documentation/web-api/reference/unfollow-artists-users
   """
-  @spec unfollow_artists_or_users(String.t(), String.t(), [String.t()], String.t()) :: {:ok, any()} | {:error, Error.t()}
-  def unfollow_artists_or_users(type, token, ids, _context_user_id \\ nil) when is_list(ids) do
+  @spec unfollow_artists_or_users(String.t(), String.t(), [String.t()], String.t() | nil) :: {:ok, any()} | {:error, Error.t()}
+  def unfollow_artists_or_users(type, token, ids, context_user_id \\ nil)
+  def unfollow_artists_or_users(type, token, ids, _context_user_id) when is_list(ids) do
     with :ok <- validate_follow_type(type),
          :ok <- Error.validate_token(token),
          :ok <- Error.validate_list(ids, "ids"),
@@ -104,8 +106,9 @@ defmodule Exspotify.Users do
   type: "artist" or "user"
   https://developer.spotify.com/documentation/web-api/reference/check-current-user-follows
   """
-  @spec check_if_user_follows_artists_or_users(String.t(), String.t(), [String.t()], String.t()) :: {:ok, [boolean()]} | {:error, Error.t()}
-  def check_if_user_follows_artists_or_users(type, token, ids, _context_user_id \\ nil) when is_list(ids) do
+  @spec check_if_user_follows_artists_or_users(String.t(), String.t(), [String.t()], String.t() | nil) :: {:ok, [boolean()]} | {:error, Error.t()}
+  def check_if_user_follows_artists_or_users(type, token, ids, context_user_id \\ nil)
+  def check_if_user_follows_artists_or_users(type, token, ids, _context_user_id) when is_list(ids) do
     with :ok <- validate_follow_type(type),
          :ok <- Error.validate_token(token),
          :ok <- Error.validate_list(ids, "ids"),

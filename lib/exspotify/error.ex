@@ -14,6 +14,9 @@ defmodule Exspotify.Error do
     | :invalid_type
     | :empty_list
 
+    # Configuration errors
+    | :configuration_error
+
     # HTTP/API errors
     | :unauthorized
     | :forbidden
@@ -33,21 +36,23 @@ defmodule Exspotify.Error do
     type: error_reason(),
     message: String.t(),
     details: map() | nil,
-    status: integer() | nil
+    status: integer() | nil,
+    suggestion: String.t() | nil
   }
 
-  defstruct [:type, :message, :details, :status]
+  defstruct [:type, :message, :details, :status, :suggestion]
 
   @doc """
   Creates a new error struct with the given type and message.
   """
-  @spec new(error_reason(), String.t(), map() | nil, integer() | nil) :: t()
-  def new(type, message, details \\ nil, status \\ nil) do
+  @spec new(error_reason(), String.t(), map() | nil, integer() | nil, String.t() | nil) :: t()
+  def new(type, message, details \\ nil, status \\ nil, suggestion \\ nil) do
     %__MODULE__{
       type: type,
       message: message,
       details: details,
-      status: status
+      status: status,
+      suggestion: suggestion || default_suggestion(type)
     }
   end
 
@@ -108,6 +113,14 @@ defmodule Exspotify.Error do
   end
 
   @doc """
+  Creates a configuration error with helpful suggestions.
+  """
+  @spec configuration_error(String.t(), String.t() | nil) :: t()
+  def configuration_error(message, suggestion \\ nil) do
+    new(:configuration_error, message, nil, nil, suggestion)
+  end
+
+  @doc """
   Converts HTTP status codes and responses to structured errors.
   """
   @spec from_http_response(integer(), any()) :: t()
@@ -130,7 +143,8 @@ defmodule Exspotify.Error do
   def from_http_response(429, body) do
     retry_after = extract_retry_after(body)
     message = if retry_after, do: "Rate limit exceeded. Retry after #{retry_after} seconds", else: "Rate limit exceeded"
-    new(:rate_limited, message, %{response_body: body, retry_after: retry_after}, 429)
+    suggestion = "Wait before making more requests. Consider implementing exponential backoff for retries."
+    new(:rate_limited, message, %{response_body: body, retry_after: retry_after}, 429, suggestion)
   end
 
   def from_http_response(500, body) do
@@ -171,6 +185,41 @@ defmodule Exspotify.Error do
   def json_decode_error(data) do
     new(:json_decode_error, "Failed to decode JSON response", %{data: data})
   end
+
+  # Private helper to provide default suggestions based on error type
+  defp default_suggestion(:empty_token) do
+    "Get a token with Auth.get_access_token/0 or TokenManager.get_token/0"
+  end
+
+  defp default_suggestion(:invalid_token) do
+    "Ensure your token is a valid string from Auth.get_access_token/0"
+  end
+
+  defp default_suggestion(:unauthorized) do
+    "Check if your token is valid and not expired. Try refreshing with Auth.refresh_access_token/1 or get a new one with Auth.get_access_token/0"
+  end
+
+  defp default_suggestion(:forbidden) do
+    "Check if your application has the required scopes for this endpoint. Some endpoints require user authorization."
+  end
+
+  defp default_suggestion(:not_found) do
+    "Verify the resource ID is correct and the resource exists"
+  end
+
+  defp default_suggestion(:network_error) do
+    "Check your internet connection and try again"
+  end
+
+  defp default_suggestion(:empty_list) do
+    "Provide at least one item in the list. For conditional logic, check if the list is empty before calling this function."
+  end
+
+  defp default_suggestion(:json_decode_error) do
+    "This may indicate an issue with the Spotify API response. Please report this if it persists."
+  end
+
+  defp default_suggestion(_), do: nil
 
   # Private helper to extract retry-after from rate limit responses
   defp extract_retry_after(body) when is_map(body) do
