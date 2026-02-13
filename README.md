@@ -36,6 +36,16 @@ config :exspotify,
   redirect_uri: "http://localhost:4000/auth/callback"  # For user auth flows
 ```
 
+**When using only user auth (e.g. in a Phoenix app with OAuth):** set `token_manager: false` so the client-credentials TokenManager is not started:
+
+```elixir
+config :exspotify,
+  client_id: "...",
+  client_secret: "...",
+  redirect_uri: "http://localhost:4000/auth/callback",
+  token_manager: false
+```
+
 ### 2. Basic Usage
 
 ```elixir
@@ -72,9 +82,10 @@ Exspotify supports both authentication flows:
 ### Authorization Code Flow (User access)
 
 ```elixir
-# 1. Build authorization URL
-scopes = ["user-read-private", "playlist-read-private"]
+# 1. Build authorization URL (use built-in scopes for playlists + playback)
+scopes = Exspotify.Auth.scopes_for_user_playback()  # playlist-read-private, streaming, etc.
 {:ok, auth_url} = Exspotify.Auth.build_authorization_url(scopes, "state123")
+# Redirect user to URI.to_string(auth_url)
 
 # 2. Redirect user to auth_url, they'll return with a code
 
@@ -158,9 +169,12 @@ config :exspotify,
   client_id: "your_client_id",           # Required for all flows
   client_secret: "your_client_secret",   # Required for all flows  
   redirect_uri: "http://localhost:4000", # Required for user auth
+  token_manager: true,                   # Optional, set false when using only user auth (no client-credentials)
   base_url: "https://api.spotify.com/v1", # Optional, for testing
   debug: false                           # Optional, enables request logging
 ```
+
+When exspotify is used as a dependency (e.g. in a Phoenix app), config is read from the parent app; Dotenv is only used when running exspotify standalone and `client_id` is not yet set.
 
 ## Examples
 

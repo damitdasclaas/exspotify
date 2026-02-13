@@ -8,9 +8,12 @@ defmodule Exspotify.Application do
 
   @impl true
   def start(_type, _args) do
-    unless Mix.env == :prod do
-      Dotenv.load
-      Mix.Task.run("loadconfig")
+    # When used as a dependency (e.g. Phoenix), config is already set; skip Dotenv.
+    unless Mix.env() == :prod do
+      if is_nil(Application.get_env(:exspotify, :client_id)) do
+        if File.exists?(".env"), do: Dotenv.load()
+        Mix.Task.run("loadconfig")
+      end
     end
 
     # Validate configuration if debug mode is enabled
@@ -18,11 +21,13 @@ defmodule Exspotify.Application do
       validate_configuration()
     end
 
-    children = [
-      # Starts a worker by calling: Exspotify.Worker.start_link(arg)
-      # {Exspotify.Worker, arg}
-      {Exspotify.TokenManager, []}
-    ]
+    # TokenManager is optional: set config :exspotify, token_manager: false when using only user-auth (e.g. Phoenix app with OAuth).
+    children =
+      if Application.get_env(:exspotify, :token_manager, true) do
+        [{Exspotify.TokenManager, []}]
+      else
+        []
+      end
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

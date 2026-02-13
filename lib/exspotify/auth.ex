@@ -1,7 +1,25 @@
 defmodule Exspotify.Auth do
+  @moduledoc """
+  Spotify OAuth flows: client credentials, authorization code (user login), and token refresh.
+  """
+
   alias Req
 
   defp config, do: Application.get_all_env(:exspotify)
+
+  @doc """
+  Scopes needed for reading the user's playlists and controlling playback (e.g. Web Playback SDK).
+  Use with `build_authorization_url/2` when building the login URL for a host/jukebox app.
+  """
+  @spec scopes_for_user_playback() :: [String.t()]
+  def scopes_for_user_playback do
+    [
+      "user-read-private",
+      "playlist-read-private",
+      "streaming",
+      "user-modify-playback-state"
+    ]
+  end
 
   def get_access_token do
     client_id = Keyword.get(config(), :client_id)
