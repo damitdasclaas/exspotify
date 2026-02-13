@@ -16,6 +16,7 @@ defmodule Exspotify.Auth do
     [
       "user-read-private",
       "playlist-read-private",
+      "playlist-read-collaborative",
       "streaming",
       "user-modify-playback-state"
     ]

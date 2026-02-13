@@ -36,23 +36,25 @@ defmodule Exspotify.Playlists do
 
   @doc """
   Get items (tracks/episodes) in a playlist (paginated).
-  https://developer.spotify.com/documentation/web-api/reference/get-playlists-tracks
+  Uses the current API: GET /playlists/{id}/items (deprecated /tracks returns 403).
+  https://developer.spotify.com/documentation/web-api/reference/get-playlists-items
   """
   @spec get_playlist_items(String.t(), String.t(), keyword) :: {:ok, Paging.t()} | {:error, Error.t()}
   def get_playlist_items(playlist_id, token, opts \\ []) do
     with :ok <- Error.validate_id(playlist_id, "playlist_id"),
          :ok <- Error.validate_token(token) do
       query = URI.encode_query(opts)
-      path = "/playlists/#{playlist_id}/tracks" <> if(query != "", do: "?#{query}", else: "")
+      path = "/playlists/#{playlist_id}/items" <> if(query != "", do: "?#{query}", else: "")
       case Client.get(path, [], token) do
         {:ok, paging_map} ->
-          # Parse playlist items which can be tracks or episodes wrapped in a playlist item object
+          # New API returns "item", deprecated had "track"; normalize to "track" for callers
           parsed_paging = Paging.from_map(paging_map, fn item ->
+            track_or_episode = item["item"] || item["track"]
             %{
               "added_at" => item["added_at"],
               "added_by" => item["added_by"],
               "is_local" => item["is_local"],
-              "track" => parse_playlist_track(item["track"])
+              "track" => parse_playlist_track(track_or_episode)
             }
           end)
           {:ok, parsed_paging}

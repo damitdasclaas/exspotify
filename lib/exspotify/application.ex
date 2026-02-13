@@ -3,15 +3,21 @@ defmodule Exspotify.Application do
   # for more information on OTP Applications
   @moduledoc false
 
+  @compile {:no_warn_undefined, [Dotenv]}
+
   use Application
   require Logger
 
   @impl true
   def start(_type, _args) do
-    # When used as a dependency (e.g. Phoenix), config is already set; skip Dotenv.
+    # When used as a dependency (e.g. Phoenix), config is already set or Dotenv isn't available; skip.
     unless Mix.env() == :prod do
       if is_nil(Application.get_env(:exspotify, :client_id)) do
-        if File.exists?(".env"), do: Dotenv.load()
+        if File.exists?(".env") do
+          if Code.ensure_loaded?(Dotenv) do
+            apply(Dotenv, :load, [])
+          end
+        end
         Mix.Task.run("loadconfig")
       end
     end
