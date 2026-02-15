@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2026-02-15
+
+### Fixed
+
+- Disable automatic Req retries on 429 responses (`retry: false`). Previously, Req's default `retry: :safe_transient` would block the calling process for the full `Retry-After` duration (sometimes 40+ minutes), freezing LiveView processes.
+- Extract `Retry-After` header from 429 HTTP responses and include it in `Exspotify.Error` details, allowing callers to implement their own non-blocking retry logic.
+
 ## [0.1.3] - 2026-02-15
 
 ### Fixed
