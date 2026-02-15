@@ -69,6 +69,24 @@ defmodule Exspotify.Client do
 
   defp all_headers(auth_header, headers), do: [auth_header | headers]
 
+  # Req.Response.headers ist eine Map: %{"header-name" => ["value1", ...]}
+  defp get_retry_after_header(headers) when is_map(headers) do
+    case headers["retry-after"] do
+      [val | _] -> parse_retry_after(val)
+      _ -> nil
+    end
+  end
+  defp get_retry_after_header(_), do: nil
+
+  defp parse_retry_after(val) when is_binary(val) do
+    case Integer.parse(val) do
+      {n, _} -> n
+      :error -> nil
+    end
+  end
+  defp parse_retry_after(val) when is_integer(val), do: val
+  defp parse_retry_after(_), do: nil
+
   defp make_request(url, method, headers, body) do
     req_opts =
       [
@@ -88,6 +106,15 @@ defmodule Exspotify.Client do
           Logger.debug("Exspotify API Response: #{status} - Success")
         end
         parse_success_response(resp_body)
+
+      {:ok, %Req.Response{status: 429, headers: headers, body: error_body}} ->
+        # Retry-After aus den HTTP-Headers extrahieren (Spotify sendet ihn dort, nicht im Body)
+        retry_after = get_retry_after_header(headers)
+        body_with_retry = if is_map(error_body), do: Map.put(error_body, "retry_after", retry_after), else: %{"retry_after" => retry_after}
+        if debug_enabled?() do
+          Logger.warning("Exspotify API Response: 429 Rate Limited - Retry-After: #{inspect(retry_after)}s")
+        end
+        {:error, Error.from_http_response(429, body_with_retry)}
 
       {:ok, %Req.Response{status: status, body: error_body}} ->
         if debug_enabled?() do
