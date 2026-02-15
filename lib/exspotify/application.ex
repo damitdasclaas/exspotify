@@ -8,8 +8,8 @@ defmodule Exspotify.Application do
 
   @impl true
   def start(_type, _args) do
-    # When used as a dependency (e.g. Phoenix), config is already set or Dotenv isn't available; skip.
-    unless Mix.env() == :prod do
+    # In a release Mix is not available; only load .env/loadconfig in dev/test when Mix is present.
+    if Code.ensure_loaded?(Mix) and Mix.env() != :prod do
       if is_nil(Application.get_env(:exspotify, :client_id)) do
         if File.exists?(".env") do
           load_dotenv_if_available()
