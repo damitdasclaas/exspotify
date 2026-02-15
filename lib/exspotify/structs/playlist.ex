@@ -56,7 +56,8 @@ defmodule Exspotify.Structs.Playlist do
       owner: parse_owner(Map.get(map, "owner")),
       public: Map.get(map, "public"),
       snapshot_id: Map.get(map, "snapshot_id"),
-      tracks: Map.get(map, "tracks")
+      # API nutzt teils "items", teils "tracks" für { "href", "total" }
+      tracks: Map.get(map, "tracks") || Map.get(map, "items")
     }
   end
 

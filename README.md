@@ -18,7 +18,7 @@ Add `exspotify` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:exspotify, "~> 0.1.0"}
+    {:exspotify, "~> 0.1.3"}
   ]
 end
 ```
@@ -161,6 +161,8 @@ album.artists     # [%Exspotify.Structs.Artist{}]
 album.images      # [%Exspotify.Structs.Image{}]
 album.release_date # String.t() | nil
 ```
+
+The Playlist struct normalizes track list data: the Spotify API may return it under `"tracks"` or `"items"`; both are mapped to the `tracks` field.
 
 ## Configuration Options
 
