@@ -3,8 +3,6 @@ defmodule Exspotify.Application do
   # for more information on OTP Applications
   @moduledoc false
 
-  @compile {:no_warn_undefined, [Dotenv]}
-
   use Application
   require Logger
 
@@ -14,9 +12,7 @@ defmodule Exspotify.Application do
     unless Mix.env() == :prod do
       if is_nil(Application.get_env(:exspotify, :client_id)) do
         if File.exists?(".env") do
-          if Code.ensure_loaded?(Dotenv) do
-            apply(Dotenv, :load, [])
-          end
+          load_dotenv_if_available()
         end
         Mix.Task.run("loadconfig")
       end
@@ -66,5 +62,11 @@ defmodule Exspotify.Application do
     end
 
     Logger.debug("Exspotify Configuration validated successfully")
+  end
+
+  # Dotenv is optional (only in dev/test when exspotify runs standalone). Resolve at runtime to avoid compile warning in host apps that don't depend on dotenv.
+  defp load_dotenv_if_available do
+    mod = Module.concat(Elixir, "Dotenv")
+    if Code.ensure_loaded?(mod), do: apply(mod, :load, [])
   end
 end
