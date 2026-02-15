@@ -74,7 +74,11 @@ defmodule Exspotify.Client do
       [
         method: method,
         url: url,
-        headers: headers
+        headers: headers,
+        # Kein automatischer Retry bei 429 – Req blockiert sonst den Prozess
+        # minutenlang wegen Spotify's Retry-After-Header.
+        # Caller (z. B. LiveView) soll den Fehler selbst behandeln.
+        retry: false
       ] ++
         (if body, do: [body: body], else: [])
 
