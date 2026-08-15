@@ -1,8 +1,9 @@
 # Exspotify
 
-Elixir client for the [Spotify Web API](https://developer.spotify.com/documentation/web-api/). Tokens, structs, errors — not raw JSON maps.
+[![Hex.pm](https://img.shields.io/hexpm/v/exspotify.svg)](https://hex.pm/packages/exspotify)
+[![Documentation](https://img.shields.io/badge/documentation-hexdocs-blue.svg)](https://hexdocs.pm/exspotify)
 
-On Hex: [exspotify](https://hex.pm/packages/exspotify). Docs: [hexdocs.pm/exspotify](https://hexdocs.pm/exspotify).
+Elixir client for the [Spotify Web API](https://developer.spotify.com/documentation/web-api/). Tokens, structs, errors — not raw JSON maps.
 
 Not affiliated with Spotify.
 
